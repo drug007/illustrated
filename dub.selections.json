@@ -1,0 +1,21 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"arsd-official": "2.1.3",
+		"cblas": "2.0.4",
+		"derelict-gl3": "2.0.0-beta.8",
+		"derelict-sdl2": "3.1.0-alpha.4",
+		"derelict-util": "3.0.0-beta.2",
+		"dstats": "1.0.5",
+		"gfm": "7.0.8",
+		"lapack": "0.3.0",
+		"lubeck": "1.1.7",
+		"mir-algorithm": "3.7.18",
+		"mir-blas": "1.1.9",
+		"mir-core": "1.1.0",
+		"mir-lapack": "1.2.2",
+		"mir-linux-kernel": "1.0.1",
+		"mir-random": "2.2.11",
+		"nanogui": "0.3.0"
+	}
+}
