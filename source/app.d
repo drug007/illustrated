@@ -153,25 +153,25 @@ class MyGui : SdlBackend
 		sx = 4;
 		sxy = sxy2 = 1;
 		sy = 4;
+		samples.length = glcanvas.DataSize;
 	}
 
-	auto generateData()
+	auto generateData() @nogc
 	{
 		import mir.ndslice.slice: sliced;
 		import mir.random;
 		import mir.random.ndvariable : multivariateNormalVar, MultivariateNormalVariable;
 
 		scope Random* gen = threadLocalPtr!Random;
-		auto sigma = sbase[].dup.sliced(2,2);
+		gen.__ctor(0);
+		float[4] dummy = sbase[];
+		auto sigma = dummy[].sliced(2,2);
 		if (!MultivariateNormalVariable!float.cholesky(sigma))
 			return false;
 		auto rv = multivariateNormalVar!float(sigma, true);
-		samples.length = 0;
-		samples.reserve(glcanvas.DataSize);
-		foreach(_; 0..glcanvas.DataSize)
+		foreach(i; 0..glcanvas.DataSize)
 		{
-			samples ~= Vector2f(0, 0);
-			rv(gen, samples.back.v[]);
+			rv(gen, samples[i].v[]);
 		}
 
 		// import dstats.summary;
