@@ -26,8 +26,8 @@ class MyGlCanvas : GLCanvas
 			in vec3 color;
 			out vec4 frag_color;
 			void main() {
-				frag_color  = modelViewProj * vec4(0.5 * color, 1.0);
-				gl_Position = modelViewProj * vec4(position / 10, 1.0);
+				frag_color  = vec4(color, 1.0);
+				gl_Position = modelViewProj * vec4(position, 1.0);
 			}
 			#endif
 
@@ -66,7 +66,6 @@ class MyGlCanvas : GLCanvas
 
 		_vao_data = scoped!GLVAO(gl);
 		{
-			import std;
 			auto vertices = Vertex(Vector3f(.5,  .5, 0), Vector3f(1, 1, 1)).repeat(DataSize).array;
 
 			_buf_data = scoped!GLBuffer(gl, GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices);
@@ -79,8 +78,8 @@ class MyGlCanvas : GLCanvas
 
 	override void drawGL()
 	{
-		mat4f mvp;
-		mvp = mat4f.identity;
+		auto mvp = mat4f.identity * scale;
+		mvp.ptr[3*4+3] = 1;
 
 		GLboolean depth_test_enabled;
 		glGetBooleanv(GL_DEPTH_TEST, &depth_test_enabled);
@@ -104,6 +103,7 @@ class MyGlCanvas : GLCanvas
 		glDrawArrays(GL_POINTS, 0, DataSize);
 		_vao_data.unbind();
 	}
+	float scale = 1;
 
 private:
 	GLProgram _program;
@@ -250,9 +250,11 @@ class MyGui : SdlBackend
 
 		glcanvas._buf_data.setData(
 			samples.map!((ref v) {
-				return Vertex(Vector3f(v, 0), Vector3f(0.7, 0.7, 0.3));
+				return Vertex(Vector3f(v, 0), Vector3f(0.35, 0.35, 0.15));
 			}).array
 		);
+
+		glcanvas.scale = 1.0/10;
 
 		return true;
 	}
