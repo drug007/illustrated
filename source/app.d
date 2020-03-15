@@ -120,7 +120,7 @@ private:
 	int[] _idx_axis;
 	ScopedGLBuffer _buf_axis, _buf_data;
 
-	enum DataSize = 100_000;
+	enum DataSize = 30_000;
 }
 
 class MyGui : SdlBackend
@@ -161,26 +161,96 @@ class MyGui : SdlBackend
 		import mir.ndslice.slice: sliced;
 		import mir.random;
 		import mir.random.ndvariable : multivariateNormalVar, MultivariateNormalVariable;
+		import mir.random.variable : normalVar;
 
 		scope Random* gen = threadLocalPtr!Random;
 		gen.__ctor(0);
-		float[4] dummy = sbase[];
-		auto sigma = dummy[].sliced(2,2);
-		if (!MultivariateNormalVariable!float.cholesky(sigma))
-			return false;
-		auto rv = multivariateNormalVar!float(sigma, true);
+		// float[4] dummy = sbase[];
+		// auto sigma = dummy[].sliced(2,2);
+		// if (!MultivariateNormalVariable!float.cholesky(sigma))
+		// 	return false;
+		// auto rv = multivariateNormalVar!float(sigma, true);
+		// foreach(i; 0..glcanvas.DataSize)
+		// {
+		// 	rv(gen, samples[i].v[]);
+		// }
+
+		auto sigma_angle = 10.0*PI/180.0;
+		auto sigma_range = 0.100;
+		auto ang = normalVar!float(sigma_angle);
+		auto rng = normalVar!float(sigma_range);
 		foreach(i; 0..glcanvas.DataSize)
 		{
-			rv(gen, samples[i].v[]);
+			auto angle = ang(gen);
+			auto range = rng(gen);
+			// angle += PI/4;
+			// range += 150000;
+			samples[i].x = angle;//range * sin(angle);
+			samples[i].y = range;// * cos(angle);
+// debug
+// {
+// 	import std;
+// 	writeln(samples[i]);
+// 	// break;
+// }
 		}
 
-		// import dstats.summary;
-		// MeanSD summ_x, summ_y;
-		// import std;
-		// samples.map!"a.x".each!(v=>summ_x.put(v));
-		// samples.map!"a.y".each!(v=>summ_y.put(v));
-		// writeln(summ_x);
-		// writeln(summ_y);
+		debug
+		{
+			import dstats.summary : MeanSD;
+			// MeanSD summ_x, summ_y;
+			import std;
+
+			import dstats.cor;
+			// samples.map!"a.x".each!(v=>summ_x.put(v));
+			// samples.map!"a.y".each!(v=>summ_y.put(v));
+			// writeln(summ_x);
+			// writeln(summ_y);
+			writeln(mean(samples.map!(a=>a.x))*180/PI);
+			writeln(covariance(samples.map!(a=>a.x), samples.map!(a=>a.y)));
+			writeln(mean(samples.map!(a=>a.y)));
+			// auto input = [[1, 0], [2, 1], [1, 3], [1, 4]];
+			// auto X = input.map!"a[0]";
+			// auto Y = input.map!"a[1]";
+			// const xe = X.sum/cast(double) input.length;
+			// const ye = Y.sum/cast(double) input.length;
+			// writeln("xe: ", xe);
+			// writeln("ye: ", ye);
+			// // E(x - E(x)*(x - E(x)))
+			// auto xx = 0.0;
+			// foreach(x; input.map!"a[0]")
+			// {
+			// 	xx += (x - xe)^^2;
+			// 	writeln(xx, ": x:", x, " (x-xe):", x-xe);
+			// }
+			// xx /= (input.length-1);
+			
+			// // E(x - E(x)*(y - E(y)))
+			// auto xy = 0.0;
+			// foreach(a; input)
+			// {
+			// 	const x = a[0];
+			// 	const y = a[1];
+			// 	xy += (x - xe)*(y - ye);
+			// }
+			// xy /= (input.length-1);
+			// // E(y - E(y)*(y - E(y)))
+			// auto yy = 0.0;
+			// foreach(y; input.map!"a[1]")
+			// {
+			// 	yy += (y - ye)^^2;
+			// }
+			// yy /= (input.length-1);
+			// // writeln("xx: ", xx);
+			// // writeln("xy: ", xy);
+			// // writeln("yy: ", yy);
+			// writefln("( %s, %s )", xx, xy);
+			// writefln("( %s, %s )", xy, yy);
+			auto covMatrix = [[0.0], [0.0, 0.0]];
+			auto input = [[1, 2, 1, 1], [0, 1, 3, 4]];
+			covarianceMatrix(input, covMatrix);
+			writeln(covMatrix);
+		}
 
 		return true;
 	}
