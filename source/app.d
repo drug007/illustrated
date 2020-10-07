@@ -13,9 +13,9 @@ struct Vertex
 
 class MyGlCanvas : GLCanvas
 {
-	this(Widget parent, OpenGL gl)
+	this(Widget parent, int w, int h)
 	{
-		super(parent);
+		super(parent, w, h);
 
 		const program_source = 
 			"#version 130
@@ -39,11 +39,11 @@ class MyGlCanvas : GLCanvas
 			}
 			#endif";
 
-		_program = new GLProgram(gl, program_source);
+		_program = new GLProgram(program_source);
 		assert(_program);
 		auto _vert_spec = scoped!(VertexSpecification!Vertex)(_program);
 
-		_vao_axis = scoped!GLVAO(gl);
+		_vao_axis = scoped!GLVAO();
 		{
 			_idx_axis = [ 1, 0, 2, ];
 
@@ -54,8 +54,8 @@ class MyGlCanvas : GLCanvas
 				Vertex(Vector3f(0,  1, 0), Vector3f(0, 0, 1)),
 			];
 
-			_buf_axis = scoped!GLBuffer(gl, GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices);
-			auto ibo = scoped!GLBuffer(gl, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, _idx_axis);
+			_buf_axis = scoped!GLBuffer(GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices);
+			auto ibo = scoped!GLBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, _idx_axis);
 
 			_vao_axis.bind();
 			_buf_axis.bind();
@@ -64,11 +64,11 @@ class MyGlCanvas : GLCanvas
 			_vao_axis.unbind();
 		}
 
-		_vao_data = scoped!GLVAO(gl);
+		_vao_data = scoped!GLVAO();
 		{
 			auto vertices = Vertex(Vector3f(.5,  .5, 0), Vector3f(1, 1, 1)).repeat(DataSize).array;
 
-			_buf_data = scoped!GLBuffer(gl, GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices);
+			_buf_data = scoped!GLBuffer(GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices);
 			_vao_data.bind();
 			_buf_data.bind();
 			_vert_spec.use();
@@ -114,8 +114,8 @@ private:
 	import nanogui.common;
 	import nanogui.widget : Widget;
 
-	alias ScopedGLBuffer = typeof(scoped!GLBuffer(OpenGL.init, GL_ARRAY_BUFFER, GL_STATIC_DRAW, Vertex[].init));
-	alias ScopedGLVAO = typeof(scoped!GLVAO(OpenGL.init));
+	alias ScopedGLBuffer = typeof(scoped!GLBuffer(GL_ARRAY_BUFFER, GL_STATIC_DRAW, Vertex[].init));
+	alias ScopedGLVAO = typeof(scoped!GLVAO());
 	ScopedGLVAO _vao_axis, _vao_data;
 	int[] _idx_axis;
 	ScopedGLBuffer _buf_axis, _buf_data;
@@ -335,9 +335,13 @@ class MyGui : SdlBackend
 			auto window = new Window(screen, "2D covariance matrix visualisation");
 			window.position = Vector2i(360, 20);
 			window.layout = new GroupLayout();
-			glcanvas = new MyGlCanvas(window, gl);
-			glcanvas.size = Vector2i(600, 600);
+			glcanvas = new MyGlCanvas(window, 250, 250);
+			glcanvas.size = Vector2i(160, 160);
 			glcanvas.backgroundColor = Color(0.1f, 0.1f, 0.1f, 1.0f);
+			glcanvas = new MyGlCanvas(window, 250, 250);
+			glcanvas.size = Vector2i(160, 160);
+			glcanvas.backgroundColor = Color(0.1f, 0.1f, 0.1f, 1.0f);
+			new FloatBox!float(window);
 		}
 
 		{
